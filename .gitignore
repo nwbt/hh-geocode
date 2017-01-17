@@ -3,3 +3,4 @@ logs/
 *.swp
 ..bfg-report/
 locations.csv
+secrets

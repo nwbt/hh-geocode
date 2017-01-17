@@ -9,11 +9,11 @@
 from collections import OrderedDict
 from googlemaps import geocoding
 from googlemaps import client
+import argparse
 import csv
 import sys
 import os
 import logging
-import click
 import re
 import json
 
@@ -21,6 +21,7 @@ logfile = 'logs/csvToJson.txt'
 loglevel = 'WARNING'
 logmsg = '%(asctime)s|%(levelname)s|%(message)s'
 gkey = ''
+
 
 class Store:
 
@@ -74,7 +75,6 @@ def build_store_list_from_csv(filename):
     return store_list
 
 def _rekey(row):
-
     exp = re.compile(r"""(^sl_)(.*$)""")
     rekeyed_row = {} 
     for key in row:
@@ -83,20 +83,49 @@ def _rekey(row):
 
     return rekeyed_row
 
-
-@click.command()
-@click.argument('inputfile')
-@click.argument('google_api_key')
-@click.option('--outputfile', '-o', default='resources/geolocations.json')
-@click.option('--loglevel', '-l', default=loglevel)
-@click.option('--logfile', '-f', default=logfile)
-def csv_to_json(inputfile, google_api_key, outputfile, loglevel, logfile):
-
-    logging.basicConfig(filename=logfile, level=loglevel.upper(), format=logmsg)
-    store_list = build_store_list_from_csv(inputfile)
+def start():
+    cli = CommandLineInput()
+    logging.basicConfig(filename=cli.args.logfile, level=cli.args.loglevel.upper(), format=logmsg)
+    store_list = build_store_list_from_csv(cli.args.inputfile)
     pass
 
+
+class CommandLineInput():
+
+    def __init__(this):
+        parser = argparse.ArgumentParser()
+        this.args = _build_argument_list(parser)
+
+    def _inputfile(this):
+        # todo verify file exists
+        pass
+
+    def _apikey(this):
+        # todo verify exists works
+        pass
+
+    def _outputfile(this):
+        # verify path exists & okay to overwrite
+        pass
+
+    def _loglevel(this):
+        # verify logging level is valid
+        pass
+
+    def _logfile(this):
+        # verify path exists and appendable
+        pass 
+
+
+def _build_argument_list(parser):
+    parser.add_argument('inputfile', help='', type=str)
+    parser.add_argument('--apikey', '-k', help='', type=str, default='resources/secrets')
+    parser.add_argument('--outputfile', '-o', help='', type=str, default='resources/geolocations.json')
+    parser.add_argument('--loglevel', '-l', help='', type=str, default='WARNING')
+    parser.add_argument('--logfile', '-f', help='', type=str, default='logs/logfile.txt')
+    return parser.parse_args()
+
+
 if __name__ == '__main__':
-    
-    csv_to_json()
+    start()
 
